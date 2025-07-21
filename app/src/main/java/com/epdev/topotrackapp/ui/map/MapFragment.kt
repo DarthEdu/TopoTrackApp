@@ -1,4 +1,4 @@
-package com.epdev.topotrackapp.ui.gallery
+package com.epdev.topotrackapp.ui.map
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.epdev.topotrackapp.databinding.FragmentGalleryBinding
 
-class GalleryFragment : Fragment() {
+class MapFragment : Fragment() {
 
     private var _binding: FragmentGalleryBinding? = null
 
@@ -22,14 +22,14 @@ class GalleryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val galleryViewModel =
-            ViewModelProvider(this).get(GalleryViewModel::class.java)
+        val mapViewModel =
+            ViewModelProvider(this).get(MapViewModel::class.java)
 
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         val textView: TextView = binding.textGallery
-        galleryViewModel.text.observe(viewLifecycleOwner) {
+        mapViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
         return root
