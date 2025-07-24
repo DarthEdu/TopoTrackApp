@@ -1,0 +1,13 @@
+
+
+Sprint 1 - Mateo Bernal
+
+Tareas
+1. Crear base de datos local o backend con tabla de usuarios
+2. Implementar login y registro
+3. Validar sesión y mantener usuario logueado
+4. CRUD de usuarios desde app
+5. Asignar roles (admin / topógrafo)
+
+
+Para la base de datos se uso la plataforma Supabase
