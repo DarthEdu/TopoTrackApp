@@ -28,6 +28,12 @@
             </intent-filter>
         </activity>
         
+        <!-- RegisterActivity -->
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TopoTrackApp.NoActionBar" />
+        
         <!-- MainActivity (pantalla principal después del login) -->
         <activity
             android:name=".MainActivity"

@@ -32,6 +32,11 @@ class LoginActivity : AppCompatActivity() {
             val password = binding.passwordEditText.text.toString()
             viewModel.login(email, password)
         }
+
+        // Link para ir al registro
+        binding.registerLink.setOnClickListener {
+            startActivity(Intent(this, RegisterActivity::class.java))
+        }
     }
 
     private fun observeViewModel() {
