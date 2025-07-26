@@ -13,19 +13,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 object SupabaseManager {
-    
     private const val SUPABASE_URL = "https://fhqgsnjqdbyqgcoynxhr.supabase.co"
     private const val SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZocWdzbmpxZGJ5cWdjb3lueGhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMDE4MTAsImV4cCI6MjA2ODg3NzgxMH0.mmcH4ThHqElEKxbmI_bh2e7brVtMUDr73t97myNeyPM"
-
-    val supabase: SupabaseClient by lazy {
-        createSupabaseClient(
-            supabaseUrl = "https://fhqgsnjqdbyqgcoynxhr.supabase.co",
-            supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZocWdzbmpxZGJ5cWdjb3lueGhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMDE4MTAsImV4cCI6MjA2ODg3NzgxMH0.mmcH4ThHqElEKxbmI_bh2e7brVtMUDr73t97myNeyPM"
-        ) {
-            install(io.github.jan.supabase.gotrue.GoTrue)
-            install(io.github.jan.supabase.postgrest.Postgrest)
-        }
-    }
     private val httpClient = HttpClient(Android) {
         install(ContentNegotiation) {
             json(Json {

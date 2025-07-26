@@ -94,8 +94,8 @@ class MapFragment : Fragment() {
             if (contador == 0){
                 map.controller.animateTo(location)
             }
+            mapViewModel.saveLocationToSupabase(requireContext(), location.latitude, location.longitude)
             map.invalidate()
-            mapViewModel.enviarUbicacion(lat = location.latitude, lon = location.longitude)
         }
 
         mapViewModel.requestLocationUpdates(requireContext())
