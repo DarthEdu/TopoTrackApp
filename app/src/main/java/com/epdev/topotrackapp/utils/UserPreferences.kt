@@ -15,9 +15,15 @@ object UserPreferences {
     
     fun saveUserData(context: Context, email: String, name: String = "") {
         val prefs = getSharedPreferences(context)
+        val formattedName = if (name.isNotEmpty()) {
+            name.trim().replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        } else {
+            email.substringBefore("@").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        }
+        
         prefs.edit().apply {
             putString(KEY_USER_EMAIL, email)
-            putString(KEY_USER_NAME, name.ifEmpty { email.substringBefore("@") })
+            putString(KEY_USER_NAME, formattedName)
             putBoolean(KEY_IS_LOGGED_IN, true)
             apply()
         }
@@ -28,7 +34,12 @@ object UserPreferences {
     }
     
     fun getUserName(context: Context): String {
-        return getSharedPreferences(context).getString(KEY_USER_NAME, "") ?: ""
+        val name = getSharedPreferences(context).getString(KEY_USER_NAME, "") ?: ""
+        return if (name.isNotEmpty()) {
+            name.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        } else {
+            ""
+        }
     }
     
     fun isLoggedIn(context: Context): Boolean {

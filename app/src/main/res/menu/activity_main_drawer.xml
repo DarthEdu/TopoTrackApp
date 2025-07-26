@@ -26,7 +26,7 @@
         <menu>
             <item
                 android:id="@+id/nav_logout"
-                android:icon="@android:drawable/ic_menu_close_clear_cancel"
+                android:icon="@drawable/ic_door_exit"
                 android:title="Cerrar Sesión" />
         </menu>
     </item>
