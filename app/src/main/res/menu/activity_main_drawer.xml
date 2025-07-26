@@ -21,4 +21,13 @@
             android:icon="@drawable/ic_menu_polygon"
             android:title="@string/menu_polygon" />
     </group>
+    
+    <item android:title="Cuenta">
+        <menu>
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_door_exit"
+                android:title="Cerrar Sesión" />
+        </menu>
+    </item>
 </menu>
