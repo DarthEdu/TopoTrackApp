@@ -5,7 +5,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.epdev.topotrackapp.databinding.ActivityRegisterBinding
+import com.epdev.topotrackapp.utils.SupabaseManager
+import kotlinx.coroutines.launch
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -24,13 +27,11 @@ class RegisterActivity : AppCompatActivity() {
         // Botón crear cuenta
         binding.registerButton.setOnClickListener {
             val name = binding.nameEditText.text.toString()
-            val lastName = binding.lastNameEditText.text.toString()
             val email = binding.emailEditText.text.toString()
-            val address = binding.addressEditText.text.toString()
             val phone = binding.phoneEditText.text.toString()
             val password = binding.passwordEditText.text.toString()
             
-            register(name, lastName, email, address, phone, password)
+            register(name, email, phone, password)
         }
 
         // Link para ir al login
@@ -40,11 +41,10 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    private fun register(name: String, lastName: String, email: String, 
-                        address: String, phone: String, password: String) {
+    private fun register(name: String, email: String, phone: String, password: String) {
         
         // Validaciones básicas
-        if (name.isBlank() || lastName.isBlank() || email.isBlank() || password.isBlank()) {
+        if (name.isBlank() || email.isBlank() || password.isBlank()) {
             showError("Complete los campos obligatorios")
             return
         }
@@ -57,15 +57,23 @@ class RegisterActivity : AppCompatActivity() {
         // Mostrar loading
         showLoading(true)
 
-        // Simulación de registro (reemplazar con tu lógica)
-        binding.registerButton.postDelayed({
-            showLoading(false)
-            Toast.makeText(this, "Cuenta creada exitosamente!", Toast.LENGTH_SHORT).show()
+        // Registro con Supabase Auth
+        lifecycleScope.launch {
+            val result = SupabaseManager.signUp(email, password)
             
-            // Ir al login después de registro exitoso
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-        }, 2000)
+            showLoading(false)
+            
+            if (result.isSuccess) {
+                Toast.makeText(this@RegisterActivity, "¡Cuenta creada exitosamente!", Toast.LENGTH_SHORT).show()
+                
+                // Ir al login después de registro exitoso
+                startActivity(Intent(this@RegisterActivity, LoginActivity::class.java))
+                finish()
+            } else {
+                val error = result.exceptionOrNull()?.message ?: "Error desconocido"
+                showError("Error al crear cuenta: $error")
+            }
+        }
     }
 
     private fun showError(message: String) {

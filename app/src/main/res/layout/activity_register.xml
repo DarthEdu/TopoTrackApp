@@ -9,16 +9,25 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:padding="24dp"
         tools:context=".RegisterActivity">
+
+        <!-- Contenedor centrado para todo el formulario -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/formContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
         <!-- Título -->
         <TextView
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
             android:text="Crear Cuenta"
             android:textColor="#333333"
             android:textSize="28sp"
@@ -48,27 +57,6 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Campo Apellido -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/lastNameInputLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="Apellido"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/nameInputLayout"
-            app:startIconDrawable="@android:drawable/ic_menu_myplaces">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/lastNameEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPersonName"
-                android:maxLines="1" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
         <!-- Campo Email -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/emailInputLayout"
@@ -78,7 +66,7 @@
             android:hint="Email"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/lastNameInputLayout"
+            app:layout_constraintTop_toBottomOf="@+id/nameInputLayout"
             app:startIconDrawable="@android:drawable/ic_dialog_email">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -87,27 +75,6 @@
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
                 android:maxLines="1" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Campo Dirección -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/addressInputLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="Dirección"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/emailInputLayout"
-            app:startIconDrawable="@android:drawable/ic_dialog_map">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/addressEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPostalAddress"
-                android:maxLines="2" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -120,7 +87,7 @@
             android:hint="Celular"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/addressInputLayout"
+            app:layout_constraintTop_toBottomOf="@+id/emailInputLayout"
             app:startIconDrawable="@android:drawable/stat_sys_phone_call">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -201,14 +168,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:layout_marginBottom="32dp"
             android:text="¿Ya tienes cuenta? Iniciar sesión"
             android:textColor="@color/design_default_color_primary"
             android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/errorMessage" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

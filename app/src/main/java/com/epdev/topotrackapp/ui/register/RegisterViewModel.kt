@@ -15,11 +15,10 @@ class RegisterViewModel : ViewModel() {
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
-    fun register(name: String, lastName: String, email: String, 
-                address: String, phone: String, password: String) {
+    fun register(name: String, email: String, phone: String, password: String) {
         
         // Validaciones básicas
-        if (name.isBlank() || lastName.isBlank() || email.isBlank() || password.isBlank()) {
+        if (name.isBlank() || email.isBlank() || password.isBlank()) {
             _errorMessage.value = "Complete los campos obligatorios"
             return
         }
