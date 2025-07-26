@@ -8,12 +8,16 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.epdev.topotrackapp.utils.SupabaseManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import io.github.jan.supabase.gotrue.gotrue
+import io.github.jan.supabase.postgrest.postgrest
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -30,7 +34,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.osmdroid.util.GeoPoint
+
 
 
 class MapViewModel : ViewModel() {
@@ -56,7 +62,9 @@ class MapViewModel : ViewModel() {
                     val geoPoint = GeoPoint(location.latitude, location.longitude)
                     if (_location.value != geoPoint) { // evita duplicados iguales
                         _location.postValue(geoPoint)
-                        saveLocationToSupabase(location.latitude, location.longitude)
+                        viewModelScope.launch {
+                            saveLocationToSupabase(location.latitude, location.longitude)
+                        }
                     }
                     break // Salte del loop si solo quieres guardar una por evento
                 }
@@ -77,34 +85,27 @@ class MapViewModel : ViewModel() {
     @Serializable
     data class LocationSupabaseData(val latitud: Double, val longitud: Double)
 
-    private val supabaseUrl = "https://mqpsbzrziuppiigkbiva.supabase.co"
-    private val supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xcHNienJ6aXVwcGlpZ2tiaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMjIzNzIsImV4cCI6MjA2Njg5ODM3Mn0.yiCxB62ygVCmULMttRlrnC3HXmmh-vmCj4CAQYbD5zo" // tu clave aquí
-
     private val httpClient = HttpClient(Android) {
         install(ContentNegotiation) {
             json()
         }
     }
-
-    private fun saveLocationToSupabase(lat: Double, lon: Double) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val data = LocationSupabaseData(latitud = lat, longitud = lon)
-                val response: HttpResponse = httpClient.post("$supabaseUrl/rest/v1/Ubicaciones") {
-                    header("apikey", supabaseKey)
-                    header("Authorization", "Bearer $supabaseKey")
-                    contentType(ContentType.Application.Json)
-                    accept(ContentType.Application.Json)
-                    setBody(data)
-                }
-                if (!response.status.isSuccess()) {
-                    android.util.Log.e("Supabase", "Error: ${response.status}")
-                }else{
-                    android.util.Log.i("Supabase", "Ubicación guardada con éxito: ${response.status}")
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("Supabase", "Excepción: ${e.message}")
-            }
+    private val supabaseUrl = "https://fhqgsnjqdbyqgcoynxhr.supabase.co"
+    private val supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZocWdzbmpxZGJ5cWdjb3lueGhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMDE4MTAsImV4cCI6MjA2ODg3NzgxMH0.mmcH4ThHqElEKxbmI_bh2e7brVtMUDr73t97myNeyPM"
+    suspend fun saveLocationToSupabase(lat: Double, lon: Double) {
+        try {
+            val data = LocationSupabaseData(latitud = lat, longitud = lon)
+            SupabaseManager.supabase.postgrest["Ubicaciones"].insert(data, upsert = true)
+            android.util.Log.d("Supabase", "Ubicación guardada en Supabase")
+        } catch (e: Exception) {
+            android.util.Log.e("Supabase", "Excepción: ${e.message}")
         }
     }
+
+    fun enviarUbicacion(lat: Double, lon: Double) {
+        viewModelScope.launch {
+            saveLocationToSupabase(lat, lon)
+        }
+    }
+
 }

@@ -95,6 +95,7 @@ class MapFragment : Fragment() {
                 map.controller.animateTo(location)
             }
             map.invalidate()
+            mapViewModel.enviarUbicacion(lat = location.latitude, lon = location.longitude)
         }
 
         mapViewModel.requestLocationUpdates(requireContext())
