@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.epdev.topotrackapp.databinding.ActivityLoginBinding
 import com.epdev.topotrackapp.utils.SupabaseManager
+import com.epdev.topotrackapp.utils.UserPreferences
+import com.epdev.topotrackapp.utils.ValidationUtils
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
@@ -37,9 +39,11 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun login(email: String, password: String) {
-        // Validaciones básicas
-        if (email.isBlank() || password.isBlank()) {
-            showError("Complete todos los campos")
+        // Validaciones usando ValidationUtils
+        val validationResult = ValidationUtils.validateLogin(email, password)
+        
+        if (validationResult is ValidationUtils.ValidationResult.Error) {
+            showError(validationResult.message)
             return
         }
 
@@ -53,6 +57,9 @@ class LoginActivity : AppCompatActivity() {
             showLoading(false)
             
             if (result.isSuccess) {
+                // Guardar datos del usuario
+                UserPreferences.saveUserData(this@LoginActivity, email)
+                
                 Toast.makeText(this@LoginActivity, "¡Login exitoso!", Toast.LENGTH_SHORT).show()
                 
                 // Ir a MainActivity

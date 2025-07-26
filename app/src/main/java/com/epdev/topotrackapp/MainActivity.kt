@@ -1,7 +1,10 @@
 package com.epdev.topotrackapp
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
+import android.widget.TextView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -12,6 +15,7 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.epdev.topotrackapp.databinding.ActivityMainBinding
+import com.epdev.topotrackapp.utils.UserPreferences
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,6 +24,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Verificar si el usuario está logueado
+        if (!UserPreferences.isLoggedIn(this)) {
+            // Si no está logueado, ir al login
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -34,8 +46,6 @@ class MainActivity : AppCompatActivity() {
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow
@@ -43,6 +53,53 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+        
+        // Configurar datos del usuario en el header de navegación
+        setupUserHeader()
+        
+        // Configurar listener para el menú de navegación
+        setupNavigationListener()
+    }
+
+    private fun setupNavigationListener() {
+        binding.navView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_logout -> {
+                    logout()
+                    true
+                }
+                else -> {
+                    // Manejo estándar de navegación
+                    val navController = findNavController(R.id.nav_host_fragment_content_main)
+                    androidx.navigation.ui.NavigationUI.onNavDestinationSelected(menuItem, navController)
+                }
+            }
+        }
+    }
+
+    private fun logout() {
+        // Limpiar datos del usuario
+        UserPreferences.clearUserData(this)
+        
+        // Ir a LoginActivity
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
+
+    private fun setupUserHeader() {
+        val headerView = binding.navView.getHeaderView(0)
+        val userNameTextView = headerView.findViewById<TextView>(R.id.nav_user_name)
+        val userEmailTextView = headerView.findViewById<TextView>(R.id.nav_user_email)
+        
+        // Obtener datos del usuario guardados
+        val userName = UserPreferences.getUserName(this)
+        val userEmail = UserPreferences.getUserEmail(this)
+        
+        // Mostrar los datos en el header
+        userNameTextView.text = if (userName.isNotEmpty()) userName else "Usuario"
+        userEmailTextView.text = if (userEmail.isNotEmpty()) userEmail else "email@ejemplo.com"
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

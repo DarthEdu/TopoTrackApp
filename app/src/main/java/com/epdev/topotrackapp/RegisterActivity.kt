@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.epdev.topotrackapp.databinding.ActivityRegisterBinding
 import com.epdev.topotrackapp.utils.SupabaseManager
+import com.epdev.topotrackapp.utils.UserPreferences
+import com.epdev.topotrackapp.utils.ValidationUtils
 import kotlinx.coroutines.launch
 
 class RegisterActivity : AppCompatActivity() {
@@ -43,14 +45,11 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun register(name: String, email: String, phone: String, password: String) {
         
-        // Validaciones básicas
-        if (name.isBlank() || email.isBlank() || password.isBlank()) {
-            showError("Complete los campos obligatorios")
-            return
-        }
-
-        if (password.length < 6) {
-            showError("La contraseña debe tener al menos 6 caracteres")
+        // Validaciones usando ValidationUtils
+        val validationResult = ValidationUtils.validateRegistration(name, email, phone, password)
+        
+        if (validationResult is ValidationUtils.ValidationResult.Error) {
+            showError(validationResult.message)
             return
         }
 
@@ -64,10 +63,13 @@ class RegisterActivity : AppCompatActivity() {
             showLoading(false)
             
             if (result.isSuccess) {
+                // Guardar datos del usuario después del registro exitoso
+                UserPreferences.saveUserData(this@RegisterActivity, email, name)
+                
                 Toast.makeText(this@RegisterActivity, "¡Cuenta creada exitosamente!", Toast.LENGTH_SHORT).show()
                 
-                // Ir al login después de registro exitoso
-                startActivity(Intent(this@RegisterActivity, LoginActivity::class.java))
+                // Ir directamente a MainActivity después del registro
+                startActivity(Intent(this@RegisterActivity, MainActivity::class.java))
                 finish()
             } else {
                 val error = result.exceptionOrNull()?.message ?: "Error desconocido"
