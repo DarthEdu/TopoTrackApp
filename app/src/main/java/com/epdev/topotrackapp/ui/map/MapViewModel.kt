@@ -89,6 +89,7 @@ class MapViewModel : ViewModel() {
         }
     }
 
+    //funcion para actualizacion de ubicaciones en tiempo real
     fun saveLocationToSupabase(context: Context, lat: Double, lon: Double) {
         val userEmail = UserPreferences.getUserEmail(context)
         CoroutineScope(Dispatchers.IO).launch {
