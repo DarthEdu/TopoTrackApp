@@ -10,7 +10,8 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:padding="8dp">
 
         <org.osmdroid.views.MapView
             android:id="@+id/mapPolygon"
@@ -25,6 +26,20 @@
             android:textSize="18sp"
             android:gravity="center"
             android:padding="16dp"/>
+
+        <Button
+            android:id="@+id/btnActualizarArea"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Actualizar Área" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
     </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

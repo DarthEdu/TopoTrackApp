@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.firebase.crashlytics.buildtools)
     implementation(libs.osmdroid.android)
     implementation(libs.firebase.firestore.ktx)
+    implementation("com.google.android.material:material:1.12.0")
     // Supabase (versión actualizada a la más reciente estable)
     implementation("io.github.jan-tennert.supabase:realtime-kt:1.4.1")
     implementation("io.github.jan-tennert.supabase:postgrest-kt:1.4.1")
