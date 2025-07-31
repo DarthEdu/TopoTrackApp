@@ -19,7 +19,7 @@ import com.epdev.topotrackapp.databinding.FragmentMapBinding
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
-
+import org.osmdroid.views.overlay.Polygon
 
 class MapFragment : Fragment() {
 
@@ -28,6 +28,7 @@ class MapFragment : Fragment() {
     private val userMarkers = mutableMapOf<String, Marker>()
     private val handler = android.os.Handler(Looper.getMainLooper())
     private var mostrado = 0
+    private var userPolygon: Polygon? = null // Variable para el polígono
 
     private lateinit var marker: Marker
     private val mapViewModel: MapViewModel by viewModels()
@@ -40,6 +41,7 @@ class MapFragment : Fragment() {
             Toast.makeText(requireContext(), "Permiso de ubicación denegado", Toast.LENGTH_LONG).show()
         }
     }
+
     private fun checkLocationPermissionAndStartUpdates() {
         when {
             ContextCompat.checkSelfPermission(
@@ -66,28 +68,47 @@ class MapFragment : Fragment() {
 
     private fun actualizarMarcadoresUsuarios(usuarios: List<Pair<String, GeoPoint>>) {
         val map = binding.map
+        val currentLocation = marker.position // Tu ubicación actual
 
+        // Limpiar overlays
         map.overlays.removeAll(userMarkers.values)
+        userPolygon?.let { map.overlays.remove(it) }
         userMarkers.clear()
-        for ((usuario, geoPoint) in usuarios) {
-            if (userMarkers.containsKey(usuario)) {
-                userMarkers[usuario]?.position = geoPoint
-            } else {
-                val marker = Marker(map).apply {
-                    position = geoPoint
-                    title = usuario
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                }
-                map.overlays.add(marker)
-                userMarkers[usuario] = marker
+
+        // Agregar marcador de tu ubicación (si no está en la lista)
+        val allUsers = usuarios.toMutableList().apply {
+            if (none { it.first == mapViewModel.nombreUsuarioActual(requireContext()) }) {
+                add(mapViewModel.nombreUsuarioActual(requireContext()) to currentLocation)
             }
         }
+
+        // Dibujar todos los marcadores (incluyendo el tuyo)
+        allUsers.forEach { (usuario, geoPoint) ->
+            val marker = Marker(map).apply {
+                position = geoPoint
+                title = usuario
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            }
+            map.overlays.add(marker)
+            userMarkers[usuario] = marker
+        }
+
+        // Dibujar polígono si hay 3 o más puntos (incluyendo tu ubicación)
+        if (allUsers.size >= 3) {
+            userPolygon = Polygon().apply {
+                points = allUsers.map { it.second }
+                fillColor = 0x2200FF00  // Verde semitransparente
+                strokeColor = 0xFF00FF00.toInt() // Borde verde
+                setStrokeWidth(3.0f)
+            }
+            map.overlays.add(userPolygon)
+        }
+
         map.invalidate()
     }
 
     private val updateRunnable = object : Runnable {
         override fun run() {
-            // Validación segura antes de ejecutar
             if (!isAdded || _binding == null) return
 
             try {
@@ -101,7 +122,6 @@ class MapFragment : Fragment() {
         }
     }
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -110,7 +130,6 @@ class MapFragment : Fragment() {
         val map = binding.map
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setMultiTouchControls(true)
-
         map.controller.setZoom(15.0)
 
         val startPoint = GeoPoint(-0.1807, -78.4678)
@@ -140,7 +159,6 @@ class MapFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Detener el servicio
         requireContext().stopService(Intent(requireContext(), LocationForegroundService::class.java))
         binding.map.onResume()
         handler.post(updateRunnable)
@@ -150,23 +168,22 @@ class MapFragment : Fragment() {
         binding.map.onPause()
         handler.removeCallbacks(updateRunnable)
         super.onPause()
-        //Reanudacion de servicio
         val serviceIntent = Intent(requireContext(), LocationForegroundService::class.java)
         ContextCompat.startForegroundService(requireContext(), serviceIntent)
     }
 
     override fun onDestroyView() {
-        // handler.removeCallbacks(updateRunnable) // Comentado según tu prueba
+        userPolygon?.let { binding.map.overlays.remove(it) }
+        userPolygon = null
         mapViewModel.stopLocationUpdates()
         if (_binding != null) {
-            val map = binding.map // Obtener la referencia antes de que _binding sea null
-            map.onPause() // Es bueno llamar onPause aquí también si no se hizo en onPause del Fragment
-            map.overlays.clear() // Limpiar overlays
+            val map = binding.map
+            map.onPause()
+            map.overlays.clear()
             val parent = map.parent as? ViewGroup
             parent?.removeView(map)
             map.onDetach()
         }
-
         userMarkers.clear()
         _binding = null
         super.onDestroyView()
