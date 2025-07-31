@@ -42,7 +42,6 @@ class MapViewModel : ViewModel() {
     private val _location = MutableLiveData<GeoPoint>()
     val location: LiveData<GeoPoint> = _location
     private var isUpdatingLocation = false
-
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
     private val jsonParser = kotlinx.serialization.json.Json {

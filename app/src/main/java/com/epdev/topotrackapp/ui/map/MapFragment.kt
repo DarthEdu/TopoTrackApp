@@ -1,6 +1,8 @@
 package com.epdev.topotrackapp.ui.map
 
 import android.Manifest
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Looper
@@ -12,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.epdev.topotrackapp.Foregrounds.LocationForegroundService
 import com.epdev.topotrackapp.databinding.FragmentMapBinding
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -99,8 +102,6 @@ class MapFragment : Fragment() {
     }
 
 
-
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -139,6 +140,8 @@ class MapFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        // Detener el servicio
+        requireContext().stopService(Intent(requireContext(), LocationForegroundService::class.java))
         binding.map.onResume()
         handler.post(updateRunnable)
     }
@@ -147,12 +150,14 @@ class MapFragment : Fragment() {
         binding.map.onPause()
         handler.removeCallbacks(updateRunnable)
         super.onPause()
+        //Reanudacion de servicio
+        val serviceIntent = Intent(requireContext(), LocationForegroundService::class.java)
+        ContextCompat.startForegroundService(requireContext(), serviceIntent)
     }
 
     override fun onDestroyView() {
         // handler.removeCallbacks(updateRunnable) // Comentado según tu prueba
         mapViewModel.stopLocationUpdates()
-
         if (_binding != null) {
             val map = binding.map // Obtener la referencia antes de que _binding sea null
             map.onPause() // Es bueno llamar onPause aquí también si no se hizo en onPause del Fragment

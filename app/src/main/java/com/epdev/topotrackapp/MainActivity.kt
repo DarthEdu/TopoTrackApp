@@ -214,7 +214,7 @@ class MainActivity : AppCompatActivity() {
             true // No se requiere permiso explícito antes de Android 13
         }
 
-        if ((fineLocationGranted || coarseLocationGranted) && notificationsGranted) {
+        if ((fineLocationGranted || coarseLocationGranted)) {
             Log.d("MainActivity", "Todos los permisos necesarios concedidos. Iniciando LocationForegroundService.")
             val serviceIntent = Intent(this, LocationForegroundService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
