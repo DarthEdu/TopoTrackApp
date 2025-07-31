@@ -5,7 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.ktor.client.*
-import io.ktor.client.call.body
+import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -14,6 +14,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import org.osmdroid.util.GeoPoint
 
 class PolygonViewModel : ViewModel() {
@@ -24,46 +25,53 @@ class PolygonViewModel : ViewModel() {
     private val _area = MutableLiveData<Double>()
     val area: LiveData<Double> = _area
 
+    private val _errorMessage = MutableLiveData<String>()
+    val errorMessage: LiveData<String> = _errorMessage
+
     @Serializable
     data class Ubicacion(val latitud: Double, val longitud: Double, val usuario: String)
 
     private val supabaseUrl = "https://fhqgsnjqdbyqgcoynxhr.supabase.co"
-    private val supabaseKey = "TU_SUPABASE_KEY" // remplaza por seguridad
+    private val supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZocWdzbmpxZGJ5cWdjb3lueGhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMDE4MTAsImV4cCI6MjA2ODg3NzgxMH0.mmcH4ThHqElEKxbmI_bh2e7brVtMUDr73t97myNeyPM"
 
     private val httpClient = HttpClient(Android) {
         install(ContentNegotiation) {
-            json()
+            json(Json { ignoreUnknownKeys = true })
         }
     }
 
     fun fetchUbicaciones() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val ubicaciones: List<Ubicacion> = httpClient.get("$supabaseUrl/rest/v1/Ubicaciones") {
+                val response: HttpResponse = httpClient.get("$supabaseUrl/rest/v1/Ubicaciones") {
                     header("apikey", supabaseKey)
                     header("Authorization", "Bearer $supabaseKey")
                     accept(ContentType.Application.Json)
-                }.body()
+                }
 
-                val puntos = ubicaciones.map { GeoPoint(it.latitud, it.longitud) }
+                val rawJson = response.bodyAsText()
+                val ubicaciones: List<Ubicacion> = Json.decodeFromString(rawJson)
 
-                if (puntos.size >= 3) {
+                if (ubicaciones.isNotEmpty()) {
+                    val puntos = ubicaciones.map { GeoPoint(it.latitud, it.longitud) }
+
                     _points.postValue(puntos)
-                    _area.postValue(calcularAreaMetrosCuadrados(puntos))
+                    _area.postValue(if (puntos.size >= 3) calcularAreaMetrosCuadrados(puntos) else 0.0)
                 } else {
-                    _points.postValue(puntos)
-                    _area.postValue(0.0)
+                    _errorMessage.postValue("⚠️ No se encontraron ubicaciones.")
                 }
 
             } catch (e: Exception) {
                 Log.e("PolygonViewModel", "Error al obtener puntos: ${e.message}")
+                _errorMessage.postValue("🚫 Error de red o Supabase: ${e.message}")
             }
         }
     }
 
-    private fun calcularAreaMetrosCuadrados(points: List<GeoPoint>): Double {
+    // Hacemos esta función pública para que se pueda usar desde el Fragment
+    fun calcularAreaMetrosCuadrados(points: List<GeoPoint>): Double {
         var area = 0.0
-        val radius = 6371000.0 // radio terrestre
+        val radius = 6371000.0
 
         for (i in points.indices) {
             val p1 = points[i]
