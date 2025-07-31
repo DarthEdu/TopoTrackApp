@@ -12,9 +12,9 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.Polyline
-import org.osmdroid.views.overlay.Marker
 
 class PolygonFragment : Fragment() {
 
@@ -33,30 +33,24 @@ class PolygonFragment : Fragment() {
         val context = requireContext().applicationContext
         Configuration.getInstance().load(context, context.getSharedPreferences("osmdroid", 0))
 
-        // Configuración del mapa
         map = binding.mapPolygon
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setMultiTouchControls(true)
-        map.controller.setZoom(16.0)
+        map.controller.setZoom(17.0)
 
-        // Mostrar animación de carga
         binding.progressBar.visibility = View.VISIBLE
 
-        // Llamar a Supabase para obtener ubicaciones
         polygonViewModel.fetchUbicaciones()
 
-        // Observador de puntos
         polygonViewModel.points.observe(viewLifecycleOwner) { puntos ->
             binding.progressBar.visibility = View.GONE
             drawPolygon(puntos)
         }
 
-        // Observador del área
         polygonViewModel.area.observe(viewLifecycleOwner) { area ->
-            binding.textPolygon.text = "Área: %.2f m²".format(area)
+            binding.textPolygon.text = "📏 Área: %.2f m²".format(area)
         }
 
-        // Botón de actualización manual
         binding.btnActualizarArea.setOnClickListener {
             binding.progressBar.visibility = View.VISIBLE
             polygonViewModel.fetchUbicaciones()
@@ -70,63 +64,52 @@ class PolygonFragment : Fragment() {
 
         when (points.size) {
             0 -> {
-                Snackbar.make(
-                    binding.root,
-                    "⛔ No hay ubicaciones disponibles aún.",
-                    Snackbar.LENGTH_LONG
-                ).setBackgroundTint(0xFFEEEEEE.toInt())
-                    .setTextColor(0xFF000000.toInt())
-                    .setAction("OK") {}
-                    .show()
-                map.invalidate()
+                showSnackbar("⚠️ No hay puntos disponibles aún. Se necesitan al menos 3.")
             }
 
             1 -> {
                 val marker = Marker(map).apply {
                     position = points[0]
-                    title = "Esperando más topógrafos..."
+                    title = "🔹 Punto 1"
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 }
                 map.overlays.add(marker)
-                showDecorativeSnackbar()
                 map.controller.setCenter(points[0])
-                map.invalidate()
+                showSnackbar("✳️ Se necesita al menos 3 puntos para formar un polígono.")
             }
 
             2 -> {
-                val polyline = Polyline().apply {
+                val line = Polyline().apply {
                     setPoints(points)
-                    color = 0xFF888888.toInt()
+                    color = 0xFF00BCD4.toInt() // Cyan
                     width = 6f
                 }
-                map.overlays.add(polyline)
-                showDecorativeSnackbar()
+                map.overlays.add(line)
                 map.controller.setCenter(points[0])
-                map.invalidate()
+                showSnackbar("🔷 Se necesita 1 punto más para formar un polígono.")
             }
 
             else -> {
                 val polygon = Polygon().apply {
-                    this.points = points + points.first()
-                    strokeWidth = 4f
-                    strokeColor = 0xFF000000.toInt()
-                    fillColor = 0x5500FF00.toInt()
+                    this.points = points + points.first() // Cerrar polígono
+                    strokeWidth = 5f
+                    strokeColor = 0xFF1B5E20.toInt() // Verde oscuro
+                    fillColor = 0x5532CD32.toInt()   // Verde claro translúcido
+                    title = "Área del terreno"
                 }
                 map.overlays.add(polygon)
                 map.controller.setCenter(points[0])
-                map.invalidate()
             }
         }
+
+        map.invalidate()
     }
 
-    private fun showDecorativeSnackbar() {
-        Snackbar.make(
-            binding.root,
-            "🧭 Esperando más topógrafos activos para calcular el área...",
-            Snackbar.LENGTH_LONG
-        ).setBackgroundTint(0xFFEEEEEE.toInt())
-            .setTextColor(0xFF000000.toInt())
-            .setAction("OK") {}
+    private fun showSnackbar(message: String) {
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
+            .setBackgroundTint(0xFFFAFAFA.toInt())
+            .setTextColor(0xFF212121.toInt())
+            .setAction("OK", null)
             .show()
     }
 
@@ -135,5 +118,3 @@ class PolygonFragment : Fragment() {
         _binding = null
     }
 }
-
-
