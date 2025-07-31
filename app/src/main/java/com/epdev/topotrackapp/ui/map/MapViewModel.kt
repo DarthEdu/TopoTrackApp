@@ -15,15 +15,16 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import io.github.jan.supabase.SupabaseClient
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
+import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
@@ -40,40 +41,57 @@ class MapViewModel : ViewModel() {
 
     private val _location = MutableLiveData<GeoPoint>()
     val location: LiveData<GeoPoint> = _location
+    private var isUpdatingLocation = false
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
+    private val jsonParser = kotlinx.serialization.json.Json {
+        ignoreUnknownKeys = true
+    }
 
+    fun nombreUsuarioActual(context: Context) : String{
+        val userName = UserPreferences.getUserName(context)
+        return userName
+    }
     fun requestLocationUpdates(context: Context) {
+        if (isUpdatingLocation) return // Evita múltiples registros
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
-        val locationRequest = LocationRequest.Builder(25000L)
+        val locationRequest = LocationRequest.Builder(10000L)
             .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-            .setMinUpdateIntervalMillis(15000L)
-            .setMaxUpdateDelayMillis(30000L)
+            .setMinUpdateIntervalMillis(10000L)
+            .setMaxUpdateDelayMillis(12000L)
             .build()
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 for (location in locationResult.locations) {
                     val geoPoint = GeoPoint(location.latitude, location.longitude)
-                    if (_location.value != geoPoint) { // evita duplicados iguales
+                    if (_location.value != geoPoint) {
                         _location.postValue(geoPoint)
-                        saveLocationToSupabase(context,location.latitude, location.longitude)
+                        saveLocationToSupabase(context, location.latitude, location.longitude)
                     }
-                    break // Salte del loop si solo quieres guardar una por evento
+                    break
                 }
             }
         }
 
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
+            isUpdatingLocation = true
         }
     }
 
     fun stopLocationUpdates() {
         if (::fusedLocationClient.isInitialized && ::locationCallback.isInitialized) {
             fusedLocationClient.removeLocationUpdates(locationCallback)
+            isUpdatingLocation = false
         }
     }
 
@@ -115,4 +133,35 @@ class MapViewModel : ViewModel() {
             }
         }
     }
+    fun fetchOtherUsersLocations(context: Context, onResult: (List<Pair<String, GeoPoint>>) -> Unit) {
+        val currentUser = UserPreferences.getUserEmail(context)
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = httpClient.get("$supabaseUrl/rest/v1/Ubicaciones") {
+                    header("apikey", supabaseKey)
+                    header("Authorization", "Bearer $supabaseKey")
+                    accept(ContentType.Application.Json)
+                }
+
+                if (response.status.isSuccess()) {
+                    val json = response.bodyAsText()
+                    val locations = jsonParser.decodeFromString<List<LocationSupabaseData>>(json)
+                    val otherUsers = locations.filter { it.usuario != currentUser }
+                        .map {
+                            it.usuario to GeoPoint(it.latitud, it.longitud)
+                        }
+
+                    // Enviar al hilo principal
+                    CoroutineScope(Dispatchers.Main).launch {
+                        onResult(otherUsers)
+                    }
+                } else {
+                    android.util.Log.e("Supabase", "Error al obtener ubicaciones: ${response.status}")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("Supabase", "Excepción al obtener ubicaciones: ${e.message}")
+            }
+        }
+    }
+
 }
