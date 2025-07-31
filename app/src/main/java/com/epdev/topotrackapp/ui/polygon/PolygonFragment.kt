@@ -30,13 +30,15 @@ class PolygonFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.mapPolygon.setMultiTouchControls(true)
+        binding.mapPolygon.overlays.clear()
+        binding.mapPolygon.invalidate()
 
         viewModel.points.observe(viewLifecycleOwner) { points ->
             binding.mapPolygon.overlays.clear()
 
             if (points.isNullOrEmpty()) {
                 Toast.makeText(requireContext(), "No hay puntos disponibles", Toast.LENGTH_SHORT).show()
-                binding.progressBar.visibility = View.GONE
+                binding.textPolygon.text = "Área: No disponible"
                 return@observe
             }
 
@@ -45,18 +47,16 @@ class PolygonFragment : Fragment() {
             if (points.size >= 3) {
                 drawPolygon(points)
                 val area = viewModel.calcularAreaMetrosCuadrados(points)
-                binding.textPolygon.text = "📏 Área: %.2f m²".format(area)
+                binding.textPolygon.text = "\uD83D\uDCCD Área: %.2f m²".format(area)
             } else {
                 drawDecorativeShape(points)
                 Toast.makeText(requireContext(), "Se necesitan al menos 3 puntos para formar un polígono", Toast.LENGTH_LONG).show()
                 binding.textPolygon.text = "Área: No disponible"
             }
 
-            binding.progressBar.visibility = View.GONE
             binding.mapPolygon.invalidate()
         }
 
-        binding.progressBar.visibility = View.VISIBLE
         viewModel.fetchUbicaciones()
     }
 
@@ -64,7 +64,7 @@ class PolygonFragment : Fragment() {
         for ((index, point) in points.withIndex()) {
             val marker = Marker(binding.mapPolygon).apply {
                 position = point
-                title = "📍 Punto ${index + 1}"
+                title = "\uD83D\uDCCD Punto ${index + 1}"
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
             }
             binding.mapPolygon.overlays.add(marker)
