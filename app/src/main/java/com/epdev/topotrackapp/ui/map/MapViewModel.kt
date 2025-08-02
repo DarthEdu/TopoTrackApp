@@ -69,7 +69,6 @@ class MapViewModel : ViewModel() {
                     val geoPoint = GeoPoint(location.latitude, location.longitude)
                     if (_location.value != geoPoint) {
                         _location.postValue(geoPoint)
-                        saveLocationToSupabase(context, location.latitude, location.longitude)
                     }
                     break
                 }
@@ -111,6 +110,9 @@ class MapViewModel : ViewModel() {
         val userEmail = UserPreferences.getUserEmail(context)
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                if(userEmail.isEmpty()){
+                    return@launch
+                }
                 val data = LocationSupabaseData(latitud = lat, longitud = lon, usuario = userEmail)
                 val response: HttpResponse = httpClient.post(
                     "$supabaseUrl/rest/v1/Ubicaciones?on_conflict=usuario"

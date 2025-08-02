@@ -32,17 +32,20 @@ class MapFragment : Fragment() {
 
     private lateinit var marker: Marker
     private val mapViewModel: MapViewModel by viewModels()
+    private var requestSuccessFull = false
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
             mapViewModel.requestLocationUpdates(requireContext())
+            requestSuccessFull = true
         } else {
             Toast.makeText(requireContext(), "Permiso de ubicación denegado", Toast.LENGTH_LONG).show()
         }
     }
 
     private fun checkLocationPermissionAndStartUpdates() {
+        if(requestSuccessFull){return}
         when {
             ContextCompat.checkSelfPermission(
                 requireContext(),
