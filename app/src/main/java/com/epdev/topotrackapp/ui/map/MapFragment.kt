@@ -154,8 +154,32 @@ class MapFragment : Fragment() {
         }
         mapViewModel.requestLocationUpdates(requireContext())
         checkLocationPermissionAndStartUpdates()
+        binding.btnGuardarPoligono.setOnClickListener {
+            userPolygon?.actualPoints?.let { puntos ->
+                if (puntos.size >= 3) {
+                    val area = calcularAreaPoligono(puntos)
+                    mapViewModel.guardarPoligonoEnSupabase(puntos, area)
+                    Toast.makeText(requireContext(), "Polígono guardado correctamente", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "Se necesitan al menos 3 puntos", Toast.LENGTH_SHORT).show()
+                }
+            } ?: Toast.makeText(requireContext(), "No hay polígono para guardar", Toast.LENGTH_SHORT).show()
+        }
         return binding.root
     }
+
+    private fun calcularAreaPoligono(puntos: List<GeoPoint>): Double {
+        val radius = 6371000.0 // Radio de la Tierra en metros
+        var area = 0.0
+        for (i in puntos.indices) {
+            val p1 = puntos[i]
+            val p2 = puntos[(i + 1) % puntos.size]
+            area += Math.toRadians(p2.longitude - p1.longitude) *
+                    (2 + Math.sin(Math.toRadians(p1.latitude)) + Math.sin(Math.toRadians(p2.latitude)))
+        }
+        return Math.abs(area * radius * radius / 2.0)
+    }
+
 
     override fun onResume() {
         super.onResume()

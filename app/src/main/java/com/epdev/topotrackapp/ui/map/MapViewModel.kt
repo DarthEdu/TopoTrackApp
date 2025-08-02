@@ -163,4 +163,49 @@ class MapViewModel : ViewModel() {
         }
     }
 
+    @Serializable
+    data class Coordenada(val lat: Double, val lon: Double)
+
+    @Serializable
+    data class PoligonoData(
+        val id: String,
+        val coordenadas: List<Coordenada>,
+        val fecha_creacion: String,
+        val area: Double
+    )
+
+    fun guardarPoligonoEnSupabase(
+        puntos: List<GeoPoint>,
+        area: Double,
+    ) {
+        val poligono = PoligonoData(
+            id = java.util.UUID.randomUUID().toString(),
+            coordenadas = puntos.map { Coordenada(it.latitude, it.longitude) },
+            fecha_creacion = java.time.Instant.now().toString(),
+            area = area
+        )
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = httpClient.post("https://fhqgsnjqdbyqgcoynxhr.supabase.co/rest/v1/poligonos") {
+                    header("apikey", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZocWdzbmpxZGJ5cWdjb3lueGhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMDE4MTAsImV4cCI6MjA2ODg3NzgxMH0.mmcH4ThHqElEKxbmI_bh2e7brVtMUDr73t97myNeyPM")
+                    header("Prefer", "return=minimal")
+                    contentType(ContentType.Application.Json)
+                    accept(ContentType.Application.Json)
+                    setBody(poligono)
+                }
+
+                if (response.status.isSuccess()) {
+                    android.util.Log.i("Supabase", "Polígono guardado correctamente")
+                } else {
+                    android.util.Log.e("Supabase", "Error al guardar polígono: ${response.status}")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("Supabase", "Excepción al guardar polígono: ${e.message}")
+            }
+        }
+    }
+
+
+
 }

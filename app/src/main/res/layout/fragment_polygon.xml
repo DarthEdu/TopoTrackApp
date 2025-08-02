@@ -1,39 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="8dp"
     tools:context=".ui.polygon.PolygonFragment">
 
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
+    <!-- Mapa para visualizar el polígono -->
+    <org.osmdroid.views.MapView
+        android:id="@+id/mapPolygon"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="8dp">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:minHeight="200dp"/>
 
-        <org.osmdroid.views.MapView
-            android:id="@+id/mapPolygon"
-            android:layout_width="match_parent"
-            android:layout_height="400dp" />
+    <!-- CardView para mostrar los detalles del polígono -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:cardElevation="4dp"
+        app:cardCornerRadius="8dp">
 
-        <TextView
-            android:id="@+id/textPolygon"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Área: "
-            android:textSize="18sp"
-            android:gravity="center"
-            android:padding="16dp"/>
-
-        <Button
-            android:id="@+id/btnActualizarArea"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Actualizar Área" />
+            android:orientation="vertical"
+            android:padding="16dp">
 
-    </LinearLayout>
+            <!-- Información del polígono -->
+            <TextView
+                android:id="@+id/tvPolygonId"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ID: Cargando..."
+                android:textSize="14sp"
+                android:textStyle="bold"/>
 
+            <TextView
+                android:id="@+id/tvPolygonArea"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Área: Calculando..."
+                android:textSize="16sp"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/tvPolygonDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Fecha: "
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/tvPolygonAuthor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Autor: "
+                android:textSize="14sp"/>
+
+            <!-- Botones de acción -->
+            <Button
+                android:id="@+id/btnRefresh"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Actualizar Polígonos"
+                android:drawableStart="@android:drawable/ic_menu_rotate"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+            <Button
+                android:id="@+id/btnSelectPolygon"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Seleccionar Polígono"
+                android:drawableStart="@android:drawable/ic_menu_more"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Barra de estado/progreso -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:indeterminate="true"
+        android:visibility="gone"/>
+
+</LinearLayout>
