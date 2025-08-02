@@ -47,6 +47,12 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
+        // Verificar si son credenciales de administrador
+        if (isAdminCredentials(email, password)) {
+            handleAdminLogin(email)
+            return
+        }
+
         // Mostrar loading
         showLoading(true)
 
@@ -59,6 +65,7 @@ class LoginActivity : AppCompatActivity() {
             if (result.isSuccess) {
                 // Guardar datos del usuario
                 UserPreferences.saveUserData(this@LoginActivity, email)
+                UserPreferences.saveUserRole(this@LoginActivity, "user")
                 
                 Toast.makeText(this@LoginActivity, "¡Login exitoso!", Toast.LENGTH_SHORT).show()
                 
@@ -70,6 +77,26 @@ class LoginActivity : AppCompatActivity() {
                 showError("Error al iniciar sesión: $error")
             }
         }
+    }
+
+    private fun isAdminCredentials(email: String, password: String): Boolean {
+        // Credenciales quemadas del administrador
+        val adminEmail = "admin@topotrack.com"
+        val adminPassword = "admin123"
+        
+        return email == adminEmail && password == adminPassword
+    }
+
+    private fun handleAdminLogin(email: String) {
+        // Guardar datos del administrador
+        UserPreferences.saveUserData(this, email)
+        UserPreferences.saveUserRole(this, "admin")
+        
+        Toast.makeText(this, "¡Acceso como administrador exitoso!", Toast.LENGTH_SHORT).show()
+        
+        // Ir a AdminActivity
+        startActivity(Intent(this, AdminActivity::class.java))
+        finish()
     }
 
     private fun showError(message: String) {

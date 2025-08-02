@@ -8,6 +8,7 @@ object UserPreferences {
     private const val KEY_USER_EMAIL = "user_email"
     private const val KEY_USER_NAME = "user_name"
     private const val KEY_IS_LOGGED_IN = "is_logged_in"
+    private const val KEY_USER_ROLE = "user_role"
     
     private fun getSharedPreferences(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
@@ -48,5 +49,17 @@ object UserPreferences {
     
     fun clearUserData(context: Context) {
         getSharedPreferences(context).edit().clear().apply()
+    }
+    
+    fun saveUserRole(context: Context, role: String) {
+        getSharedPreferences(context).edit().putString(KEY_USER_ROLE, role).apply()
+    }
+    
+    fun getUserRole(context: Context): String {
+        return getSharedPreferences(context).getString(KEY_USER_ROLE, "user") ?: "user"
+    }
+    
+    fun isAdmin(context: Context): Boolean {
+        return getUserRole(context) == "admin"
     }
 }

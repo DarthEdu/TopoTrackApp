@@ -77,6 +77,13 @@ class MainActivity : AppCompatActivity() {
             finish()
             return
         }
+        
+        // Verificar si el usuario es administrador y redirigir a AdminActivity
+        if (UserPreferences.isAdmin(this)) {
+            startActivity(Intent(this, AdminActivity::class.java))
+            finish()
+            return
+        }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
