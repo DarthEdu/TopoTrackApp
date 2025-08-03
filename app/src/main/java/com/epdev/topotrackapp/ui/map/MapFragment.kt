@@ -9,8 +9,10 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -28,7 +30,7 @@ class MapFragment : Fragment() {
     private val userMarkers = mutableMapOf<String, Marker>()
     private val handler = android.os.Handler(Looper.getMainLooper())
     private var mostrado = 0
-    private var userPolygon: Polygon? = null // Variable para el polígono
+    private var userPolygon: Polygon? = null
 
     private lateinit var marker: Marker
     private val mapViewModel: MapViewModel by viewModels()
@@ -71,21 +73,18 @@ class MapFragment : Fragment() {
 
     private fun actualizarMarcadoresUsuarios(usuarios: List<Pair<String, GeoPoint>>) {
         val map = binding.map
-        val currentLocation = marker.position // Tu ubicación actual
+        val currentLocation = marker.position
 
-        // Limpiar overlays
         map.overlays.removeAll(userMarkers.values)
         userPolygon?.let { map.overlays.remove(it) }
         userMarkers.clear()
 
-        // Agregar marcador de tu ubicación (si no está en la lista)
         val allUsers = usuarios.toMutableList().apply {
             if (none { it.first == mapViewModel.nombreUsuarioActual(requireContext()) }) {
                 add(mapViewModel.nombreUsuarioActual(requireContext()) to currentLocation)
             }
         }
 
-        // Dibujar todos los marcadores (incluyendo el tuyo)
         allUsers.forEach { (usuario, geoPoint) ->
             val marker = Marker(map).apply {
                 position = geoPoint
@@ -96,12 +95,11 @@ class MapFragment : Fragment() {
             userMarkers[usuario] = marker
         }
 
-        // Dibujar polígono si hay 3 o más puntos (incluyendo tu ubicación)
         if (allUsers.size >= 3) {
             userPolygon = Polygon().apply {
                 points = allUsers.map { it.second }
-                fillColor = 0x2200FF00  // Verde semitransparente
-                strokeColor = 0xFF00FF00.toInt() // Borde verde
+                fillColor = 0x2200FF00
+                strokeColor = 0xFF00FF00.toInt()
                 setStrokeWidth(3.0f)
             }
             map.overlays.add(userPolygon)
@@ -113,7 +111,6 @@ class MapFragment : Fragment() {
     private val updateRunnable = object : Runnable {
         override fun run() {
             if (!isAdded || _binding == null) return
-
             try {
                 mapViewModel.fetchOtherUsersLocations(requireContext()) { usuarios ->
                     actualizarMarcadoresUsuarios(usuarios)
@@ -157,22 +154,44 @@ class MapFragment : Fragment() {
         }
         mapViewModel.requestLocationUpdates(requireContext())
         checkLocationPermissionAndStartUpdates()
+
         binding.btnGuardarPoligono.setOnClickListener {
             userPolygon?.actualPoints?.let { puntos ->
                 if (puntos.size >= 3) {
                     val area = calcularAreaPoligono(puntos)
-                    mapViewModel.guardarPoligonoEnSupabase(puntos, area)
-                    Toast.makeText(requireContext(), "Polígono guardado correctamente", Toast.LENGTH_SHORT).show()
+                    mostrarDialogoNombreTerreno(puntos, area)
                 } else {
                     Toast.makeText(requireContext(), "Se necesitan al menos 3 puntos", Toast.LENGTH_SHORT).show()
                 }
             } ?: Toast.makeText(requireContext(), "No hay polígono para guardar", Toast.LENGTH_SHORT).show()
         }
+
         return binding.root
     }
 
+    private fun mostrarDialogoNombreTerreno(puntos: List<GeoPoint>, area: Double) {
+        val editText = EditText(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("Nombre del terreno")
+            .setMessage("Ingrese un nombre para el terreno")
+            .setView(editText)
+            .setPositiveButton("Guardar") { _, _ ->
+                val nombre = editText.text.toString().trim()
+                if (nombre.isNotEmpty()) {
+                    mapViewModel.guardarPoligonoEnSupabase(puntos, area, nombre)
+                    Toast.makeText(requireContext(), "Polígono guardado", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "El nombre no puede estar vacío", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancelar", null)
+            .create()
+
+        dialog.show()
+    }
+
     private fun calcularAreaPoligono(puntos: List<GeoPoint>): Double {
-        val radius = 6371000.0 // Radio de la Tierra en metros
+        val radius = 6371000.0
         var area = 0.0
         for (i in puntos.indices) {
             val p1 = puntos[i]
@@ -182,7 +201,6 @@ class MapFragment : Fragment() {
         }
         return Math.abs(area * radius * radius / 2.0)
     }
-
 
     override fun onResume() {
         super.onResume()
@@ -216,3 +234,4 @@ class MapFragment : Fragment() {
         super.onDestroyView()
     }
 }
+

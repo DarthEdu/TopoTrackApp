@@ -56,6 +56,24 @@ class PolygonFragment : Fragment() {
         binding.btnSelectPolygon.setOnClickListener {
             showPolygonSelectionDialog()
         }
+        binding.btnDeletePolygon.setOnClickListener {
+            val poligono = viewModel.selectedPoligono.value
+            if (poligono == null) {
+                Toast.makeText(requireContext(), "No hay polígono seleccionado", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Eliminar polígono")
+                .setMessage("¿Estás seguro de que querés eliminar el terreno \"${poligono.terreno}\"?")
+                .setPositiveButton("Eliminar") { _, _ ->
+                    viewModel.deletePoligono(poligono.id)
+                    Toast.makeText(requireContext(), "Polígono eliminado", Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("Cancelar", null)
+                .show()
+        }
+
     }
 
     private fun setupObservers() {
@@ -83,6 +101,18 @@ class PolygonFragment : Fragment() {
                 Toast.makeText(requireContext(), error, Toast.LENGTH_LONG).show()
             }
         }
+        viewModel.poligonoEliminado.observe(viewLifecycleOwner) { eliminado ->
+            if (eliminado) {
+                binding.mapPolygon.overlays.clear()
+                binding.mapPolygon.invalidate()
+                binding.tvPolygonName.text = "Nombre del terreno"
+                binding.tvPolygonId.text = ""
+                binding.tvPolygonArea.text = ""
+                binding.tvPolygonDate.text = ""
+                viewModel.fetchPoligonos()
+            }
+        }
+
     }
 
     private fun displayPolygon(poligono: PolygonViewModel.Poligono) {
@@ -108,9 +138,9 @@ class PolygonFragment : Fragment() {
 
     private fun updatePolygonInfo(poligono: PolygonViewModel.Poligono) {
         binding.tvPolygonId.text = "ID: ${poligono.id.take(8)}..."
-        binding.tvPolygonArea.text = "Área: ${"%.2f".format(poligono.area)} m²"
-        binding.tvPolygonDate.text = "Fecha: ${poligono.fecha_creacion}"
-        binding.tvPolygonAuthor.text = "Autor: ${poligono.autor}"
+        binding.tvPolygonArea.text = "${"%.2f".format(poligono.area)} m²"
+        binding.tvPolygonDate.text = "${poligono.fecha_creacion}"
+        binding.tvPolygonName.text = "Terreno: ${poligono.terreno}"
     }
 
     private fun drawMarkers(points: List<GeoPoint>) {
@@ -155,8 +185,8 @@ class PolygonFragment : Fragment() {
         viewModel.poligonos.value?.let { poligonos ->
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Seleccionar polígono")
-                .setItems(poligonos.mapIndexed { index, poligono ->
-                    "Polígono ${index + 1} - ${"%.2f".format(poligono.area)} m²"
+                .setItems(poligonos.map { p ->
+                    "${p.terreno} - ${"%.2f".format(p.area)} m²"
                 }.toTypedArray()) { _, which ->
                     viewModel.selectPoligono(poligonos[which])
                 }

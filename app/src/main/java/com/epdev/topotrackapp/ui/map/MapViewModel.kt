@@ -1,41 +1,29 @@
 package com.epdev.topotrackapp.ui.map
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Looper
+import android.widget.EditText
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.epdev.topotrackapp.utils.UserPreferences
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
+import com.google.android.gms.location.*
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.accept
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import io.ktor.http.isSuccess
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
-
-
 
 class MapViewModel : ViewModel() {
 
@@ -44,19 +32,16 @@ class MapViewModel : ViewModel() {
     private var isUpdatingLocation = false
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
-    private val jsonParser = kotlinx.serialization.json.Json {
-        ignoreUnknownKeys = true
+    private val jsonParser = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+
+    fun nombreUsuarioActual(context: Context): String {
+        return UserPreferences.getUserName(context)
     }
 
-    fun nombreUsuarioActual(context: Context) : String{
-        val userName = UserPreferences.getUserName(context)
-        return userName
-    }
     fun requestLocationUpdates(context: Context) {
-        if (isUpdatingLocation) return // Evita múltiples registros
+        if (isUpdatingLocation) return
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-
         val locationRequest = LocationRequest.Builder(10000L)
             .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
             .setMinUpdateIntervalMillis(10000L)
@@ -76,7 +61,8 @@ class MapViewModel : ViewModel() {
         }
 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED) {
+            == PackageManager.PERMISSION_GRANTED
+        ) {
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,
                 locationCallback,
@@ -94,29 +80,23 @@ class MapViewModel : ViewModel() {
     }
 
     @Serializable
-    data class LocationSupabaseData(val latitud : Double, val longitud : Double, val usuario : String)
+    data class LocationSupabaseData(val latitud: Double, val longitud: Double, val usuario: String)
 
     private val supabaseUrl = "https://fhqgsnjqdbyqgcoynxhr.supabase.co"
-    private val supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZocWdzbmpxZGJ5cWdjb3lueGhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMDE4MTAsImV4cCI6MjA2ODg3NzgxMH0.mmcH4ThHqElEKxbmI_bh2e7brVtMUDr73t97myNeyPM" // tu clave aquí
+    private val supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZocWdzbmpxZGJ5cWdjb3lueGhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMDE4MTAsImV4cCI6MjA2ODg3NzgxMH0.mmcH4ThHqElEKxbmI_bh2e7brVtMUDr73t97myNeyPM"
 
     private val httpClient = HttpClient(Android) {
-        install(ContentNegotiation) {
-            json()
-        }
+        install(ContentNegotiation) { json() }
     }
 
-    //funcion para actualizacion de ubicaciones en tiempo real
     fun saveLocationToSupabase(context: Context, lat: Double, lon: Double) {
         val userEmail = UserPreferences.getUserEmail(context)
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                if(userEmail.isEmpty()){
-                    return@launch
-                }
+                if (userEmail.isEmpty()) return@launch
+
                 val data = LocationSupabaseData(latitud = lat, longitud = lon, usuario = userEmail)
-                val response: HttpResponse = httpClient.post(
-                    "$supabaseUrl/rest/v1/Ubicaciones?on_conflict=usuario"
-                ) {
+                val response: HttpResponse = httpClient.post("$supabaseUrl/rest/v1/Ubicaciones?on_conflict=usuario") {
                     header("apikey", supabaseKey)
                     header("Authorization", "Bearer $supabaseKey")
                     header("Prefer", "resolution=merge-duplicates")
@@ -134,6 +114,7 @@ class MapViewModel : ViewModel() {
             }
         }
     }
+
     fun fetchOtherUsersLocations(context: Context, onResult: (List<Pair<String, GeoPoint>>) -> Unit) {
         val currentUser = UserPreferences.getUserEmail(context)
         CoroutineScope(Dispatchers.IO).launch {
@@ -148,11 +129,8 @@ class MapViewModel : ViewModel() {
                     val json = response.bodyAsText()
                     val locations = jsonParser.decodeFromString<List<LocationSupabaseData>>(json)
                     val otherUsers = locations.filter { it.usuario != currentUser }
-                        .map {
-                            it.usuario to GeoPoint(it.latitud, it.longitud)
-                        }
+                        .map { it.usuario to GeoPoint(it.latitud, it.longitud) }
 
-                    // Enviar al hilo principal
                     CoroutineScope(Dispatchers.Main).launch {
                         onResult(otherUsers)
                     }
@@ -173,24 +151,41 @@ class MapViewModel : ViewModel() {
         val id: String,
         val coordenadas: List<Coordenada>,
         val fecha_creacion: String,
-        val area: Double
+        val area: Double,
+        val terreno: String
     )
 
-    fun guardarPoligonoEnSupabase(
-        puntos: List<GeoPoint>,
-        area: Double,
-    ) {
+    fun mostrarDialogoGuardarPoligono(context: Context, puntos: List<GeoPoint>, area: Double) {
+        val input = EditText(context)
+        val dialog = AlertDialog.Builder(context)
+            .setTitle("Nombre del terreno")
+            .setMessage("Ingresa un nombre para el terreno:")
+            .setView(input)
+            .setPositiveButton("Guardar") { _, _ ->
+                val nombreTerreno = input.text.toString().trim()
+                if (nombreTerreno.isNotEmpty()) {
+                    guardarPoligonoEnSupabase(puntos, area, nombreTerreno)
+                }
+            }
+            .setNegativeButton("Cancelar", null)
+            .create()
+
+        dialog.show()
+    }
+
+    fun guardarPoligonoEnSupabase(puntos: List<GeoPoint>, area: Double, terreno: String) {
         val poligono = PoligonoData(
             id = java.util.UUID.randomUUID().toString(),
             coordenadas = puntos.map { Coordenada(it.latitude, it.longitude) },
             fecha_creacion = java.time.Instant.now().toString(),
-            area = area
+            area = area,
+            terreno = terreno
         )
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = httpClient.post("https://fhqgsnjqdbyqgcoynxhr.supabase.co/rest/v1/poligonos") {
-                    header("apikey", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZocWdzbmpxZGJ5cWdjb3lueGhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMDE4MTAsImV4cCI6MjA2ODg3NzgxMH0.mmcH4ThHqElEKxbmI_bh2e7brVtMUDr73t97myNeyPM")
+                val response = httpClient.post("$supabaseUrl/rest/v1/poligonos") {
+                    header("apikey", supabaseKey)
                     header("Prefer", "return=minimal")
                     contentType(ContentType.Application.Json)
                     accept(ContentType.Application.Json)
@@ -207,7 +202,5 @@ class MapViewModel : ViewModel() {
             }
         }
     }
-
-
-
 }
+

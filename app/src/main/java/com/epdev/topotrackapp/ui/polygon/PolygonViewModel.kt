@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
@@ -15,19 +16,19 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.osmdroid.util.GeoPoint
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
 
 class PolygonViewModel : ViewModel() {
 
     @Serializable
     data class Poligono(
         val id: String,
+        val terreno: String,
         val coordenadas: List<Coordenada>,
         val fecha_creacion: String,
-        val area: Double,
-        val autor: String
+        val area: Double
     )
 
     @Serializable
@@ -54,7 +55,7 @@ class PolygonViewModel : ViewModel() {
     fun fetchPoligonos() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response: HttpResponse = httpClient.get("$supabaseUrl/rest/v1/poligonos") {
+                val response: HttpResponse = httpClient.get("$supabaseUrl/rest/v1/poligonos?order=fecha_creacion.desc") {
                     header("apikey", supabaseKey)
                     header("Authorization", "Bearer $supabaseKey")
                     accept(ContentType.Application.Json)
@@ -69,10 +70,10 @@ class PolygonViewModel : ViewModel() {
 
                     Poligono(
                         id = poligono.id,
+                        terreno = poligono.terreno ?: "Sin nombre",
                         coordenadas = coordenadas,
                         fecha_creacion = fechaFormateada,
-                        area = poligono.area ?: 0.0,
-                        autor = poligono.autor ?: "Anónimo"
+                        area = poligono.area ?: 0.0
                     )
                 }
 
@@ -99,14 +100,43 @@ class PolygonViewModel : ViewModel() {
         }
     }
 
-    // Modelo temporal para mapear la respuesta de Supabase
+    private val _poligonoEliminado = MutableLiveData<Boolean>()
+    val poligonoEliminado: LiveData<Boolean> get() = _poligonoEliminado
+
+    fun deletePoligono(id: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val response = httpClient.delete("$supabaseUrl/rest/v1/poligonos") {
+                    header("apikey", supabaseKey)
+                    header("Authorization", "Bearer $supabaseKey")
+                    contentType(ContentType.Application.Json)
+                    parameter("id", "eq.$id")
+                }
+
+                if (response.status.isSuccess()) {
+                    _poligonoEliminado.postValue(true)
+                } else {
+                    _errorMessage.postValue("Error: ${response.status}")
+                    _poligonoEliminado.postValue(false)
+                }
+
+            } catch (e: Exception) {
+                Log.e("PolygonViewModel", "Error al eliminar: ${e.message}")
+                _errorMessage.postValue("Error al eliminar polígono: ${e.message}")
+                _poligonoEliminado.postValue(false)
+            }
+        }
+    }
+
+
+
     @Serializable
     private data class PoligonoSupabase(
         val id: String,
+        val terreno: String? = null,
         val coordenadas: List<CoordenadaSupabase>,
         val fecha_creacion: String,
-        val area: Double?,
-        val autor: String?
+        val area: Double?
     )
 
     @Serializable
