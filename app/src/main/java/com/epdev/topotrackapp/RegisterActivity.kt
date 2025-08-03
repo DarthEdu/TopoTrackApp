@@ -58,7 +58,7 @@ class RegisterActivity : AppCompatActivity() {
 
         // Registro con Supabase Auth
         lifecycleScope.launch {
-            val result = SupabaseManager.signUp(email, password)
+            val result = SupabaseManager.signUp(email, password, name, phone)
             
             showLoading(false)
             
