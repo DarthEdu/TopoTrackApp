@@ -9,6 +9,6 @@
 
     <string name="menu_home">Inicio</string>
     <string name="menu_gallery">Mapa</string>
-    <string name="menu_slideshow">Slideshow</string>
-    <string name="menu_polygon">Calcular Área</string>
+    <string name="menu_slideshow">Configurar Perfil</string>
+    <string name="menu_polygon">Detalles Polígono</string>
 </resources>
