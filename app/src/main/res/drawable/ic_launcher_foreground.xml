@@ -4,40 +4,38 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Hexágono (Polígono principal) -->
+    <!-- Hexágono principal mejor proporcionado -->
     <path
         android:fillColor="#4CAF50"
-        android:pathData="M54,18
-                          L78,33
-                          L78,63
-                          L54,78
-                          L30,63
-                          L30,33
+        android:strokeColor="#388E3C"
+        android:strokeWidth="1.5"
+        android:pathData="M54,22
+                          L75,35
+                          L75,61
+                          L54,74
+                          L33,61
+                          L33,35
+                          Z"
+        android:strokeLineJoin="round"/>
+
+    <!-- Letra "T" más gruesa y mejor centrada -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,40
+                          H68
+                          V48
+                          H56
+                          V64
+                          H52
+                          V48
+                          H40
                           Z"/>
 
-    <!-- Vértices (puntos blancos) -->
+    <!-- Reflejo sutil para mejor visualización -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,18
-                          m-3,0a3,3 0 1,0 6,0a3,3 0 1,0 -6,0" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M78,33
-                          m-3,0a3,3 0 1,0 6,0a3,3 0 1,0 -6,0" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M78,63
-                          m-3,0a3,3 0 1,0 6,0a3,3 0 1,0 -6,0" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,78
-                          m-3,0a3,3 0 1,0 6,0a3,3 0 1,0 -6,0" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M30,63
-                          m-3,0a3,3 0 1,0 6,0a3,3 0 1,0 -6,0" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M30,33
-                          m-3,0a3,3 0 1,0 6,0a3,3 0 1,0 -6,0" />
+        android:fillColor="#33FFFFFF"
+        android:pathData="M54,22
+                          L75,35
+                          L54,35
+                          Z"/>
 </vector>

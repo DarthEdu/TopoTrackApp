@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
@@ -9,6 +8,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
 
     <application
         android:name=".App"
@@ -25,7 +25,7 @@
         <activity
             android:name=".LoginActivity"
             android:exported="true"
-            android:theme="@style/Theme.TopoTrackApp.Splash"> <!-- CAMBIO AQUI -->
+            android:theme="@style/Theme.TopoTrackApp.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -51,11 +51,11 @@
             android:exported="false"
             android:label="Panel de Administrador"
             android:theme="@style/Theme.TopoTrackApp.NoActionBar" />
-
         <service
             android:name=".Foregrounds.LocationForegroundService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location"/>
+
     </application>
 </manifest>

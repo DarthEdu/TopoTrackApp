@@ -1,11 +1,13 @@
-<!-- res/values/colors.xml -->
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary_light">#4CAF50</color>          <!-- Verde bosque -->
-    <color name="primary_dark">#2E7D32</color>           <!-- Verde profundo -->
-    <color name="secondary_light">#00BCD4</color>        <!-- Azul agua -->
-    <color name="secondary_dark">#00838F</color>         <!-- Azul profundo -->
-    <color name="white">#FFFFFFFF</color>
+    <color name="purple_200">#FF9FA8DA</color>  <!-- Azul lavanda claro -->
+    <color name="purple_500">#FF3F51B5</color>  <!-- Azul índigo -->
+    <color name="purple_700">#FF303F9F</color>  <!-- Azul índigo oscuro -->
+    <color name="teal_200">#FF80DEEA</color>   <!-- Cian claro -->
+    <color name="teal_700">#FF00796B</color>   <!-- Verde azulado oscuro -->
     <color name="black">#FF000000</color>
-    <color name="gray_bg">#F5F5F5</color>                <!-- Fondo claro -->
-    <color name="dark_bg">#121212</color>                <!-- Fondo oscuro -->
+    <color name="white">#FFFFFFFF</color>
+    <color name="background_dark">#FF0D1B2A</color>  <!-- Azul marino muy oscuro -->
+    <color name="primaryColor">#FF3F51B5</color>  <!-- Azul índigo -->
+    <color name="error_color">#FFB00020</color>  <!-- Rojo de error -->
 </resources>

@@ -67,9 +67,6 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:postgrest-kt:1.4.1")
     implementation("io.github.jan-tennert.supabase:storage-kt:1.4.1")
 
-    // SplashScreen (versión estable más reciente)
-    implementation("androidx.core:core-splashscreen:1.0.1")
-
 // Coroutines (versión estable más reciente)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     testImplementation(libs.junit)
