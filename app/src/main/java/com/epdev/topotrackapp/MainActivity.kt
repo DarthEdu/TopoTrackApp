@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.Menu
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -28,6 +29,7 @@ import com.epdev.topotrackapp.databinding.ActivityMainBinding
 import com.epdev.topotrackapp.utils.UserPreferences
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -69,6 +71,8 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen() // Instalar pantalla de inicio antes de inflar la UI
+
         super.onCreate(savedInstanceState)
 
         // Verificar si el usuario está logueado ANTES de inflar la UI y configurar todo
