@@ -1,3 +1,4 @@
+
 package com.epdev.topotrackapp
 
 import android.content.Intent
@@ -5,89 +6,96 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.epdev.topotrackapp.databinding.ActivityAdminBinding
 import com.epdev.topotrackapp.utils.UserPreferences
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.epdev.topotrackapp.utils.SupabaseManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AdminActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityAdminBinding
+    private lateinit var adapter: UserAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
         binding = ActivityAdminBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
-        setupToolbar()
-        setupUI()
-    }
-
-    private fun setupToolbar() {
         setSupportActionBar(binding.toolbar)
-        supportActionBar?.title = "Panel de Administrador"
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(false)
+
+        // Configurar RecyclerView
+        adapter = UserAdapter(
+            onDelete = { userId, email -> deleteUser(userId, email) },
+            onViewLocations = { email -> viewLocations(email) }
+        )
+        binding.rvUsuarios.layoutManager = LinearLayoutManager(this)
+        binding.rvUsuarios.adapter = adapter
+        loadUsers()
     }
 
-    private fun setupUI() {
-        // Configurar las tarjetas de estadísticas
-        setupStatisticsCards()
-        
-        // Configurar botones de acción
-        setupActionButtons()
-    }
-
-    private fun setupStatisticsCards() {
-        // Aquí puedes agregar lógica para mostrar estadísticas reales
-        binding.cardTotalUsers.setOnClickListener {
-            Toast.makeText(this, "Ver usuarios registrados", Toast.LENGTH_SHORT).show()
-            // Aquí puedes abrir una nueva actividad o fragmento para mostrar usuarios
-        }
-        
-        binding.cardActiveSessions.setOnClickListener {
-            Toast.makeText(this, "Ver sesiones activas", Toast.LENGTH_SHORT).show()
-            // Aquí puedes abrir una nueva actividad o fragmento para mostrar sesiones
-        }
-        
-        binding.cardSystemStatus.setOnClickListener {
-            Toast.makeText(this, "Estado del sistema", Toast.LENGTH_SHORT).show()
-            // Aquí puedes mostrar el estado del sistema
+    private fun loadUsers() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = SupabaseManager.getAllUsers()
+            withContext(Dispatchers.Main) {
+                result.onSuccess { users ->
+                    adapter.submitList(users)
+                    if (users.isEmpty()) {
+                        Toast.makeText(this@AdminActivity, "No hay usuarios registrados", Toast.LENGTH_SHORT).show()
+                    }
+                }.onFailure {
+                    Toast.makeText(this@AdminActivity, "Error al cargar usuarios", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
-    private fun setupActionButtons() {
-        binding.btnManageUsers.setOnClickListener {
-            Toast.makeText(this, "Gestionar usuarios", Toast.LENGTH_SHORT).show()
-            // Aquí puedes abrir la gestión de usuarios
-        }
-        
-        binding.btnSystemSettings.setOnClickListener {
-            Toast.makeText(this, "Configuración del sistema", Toast.LENGTH_SHORT).show()
-            // Aquí puedes abrir la configuración del sistema
-        }
-        
-        binding.btnViewLogs.setOnClickListener {
-            Toast.makeText(this, "Ver logs del sistema", Toast.LENGTH_SHORT).show()
-            // Aquí puedes abrir los logs del sistema
-        }
-        
-        binding.btnBackupData.setOnClickListener {
-            Toast.makeText(this, "Respaldar datos", Toast.LENGTH_SHORT).show()
-            // Aquí puedes implementar la funcionalidad de respaldo
-        }
+    private fun deleteUser(userId: String, email: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Eliminar usuario")
+            .setMessage("¿Estás seguro de eliminar el usuario $email?")
+            .setPositiveButton("Eliminar") { _, _ ->
+                CoroutineScope(Dispatchers.IO).launch {
+                    val result = SupabaseManager.deleteUserByEmail(email)
+                    if (result.isSuccess) {
+                        // Eliminar de Auth por correo
+                        val authResult = SupabaseManager.deleteUserFromAuthByEmail(email)
+                        withContext(Dispatchers.Main) {
+                            if (authResult.isSuccess) {
+                                Toast.makeText(this@AdminActivity, "Usuario eliminado de la base y Auth", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(this@AdminActivity, "Eliminado de la base, pero error en Auth", Toast.LENGTH_LONG).show()
+                            }
+                            loadUsers()
+                        }
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@AdminActivity, "Error al eliminar usuario", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun viewLocations(email: String) {
+        com.epdev.topotrackapp.ui.map.UserLocationsMapActivity.start(this, email)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.admin_menu, menu)
+        menu.add(0, R.id.action_logout, 0, "Cerrar sesión")
+            .setIcon(android.R.drawable.ic_menu_revert)
+            .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            android.R.id.home -> {
-                onBackPressed()
-                true
-            }
             R.id.action_logout -> {
                 logout()
                 true
@@ -103,4 +111,4 @@ class AdminActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-} 
+}

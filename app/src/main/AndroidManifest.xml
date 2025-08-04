@@ -45,12 +45,22 @@
             android:label="@string/app_name"
             android:theme="@style/Theme.TopoTrackApp.NoActionBar" />
 
+
         <!-- AdminActivity (pantalla de administrador) -->
         <activity
             android:name=".AdminActivity"
             android:exported="false"
             android:label="Panel de Administrador"
             android:theme="@style/Theme.TopoTrackApp.NoActionBar" />
+
+        <!-- UserLocationsMapActivity (ver ubicaciones de un usuario en el mapa) -->
+        <activity
+            android:name=".ui.map.UserLocationsMapActivity"
+            android:exported="false"
+            android:label="Ubicaciones del Usuario"
+            android:theme="@style/Theme.TopoTrackApp.NoActionBar" />
+
+        <!-- Eliminada UserListActivity, solo se usa AdminActivity para gestión de usuarios -->
         <service
             android:name=".Foregrounds.LocationForegroundService"
             android:enabled="true"

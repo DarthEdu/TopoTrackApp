@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/white"
+    android:layout_marginBottom="14dp"
+    android:layout_marginLeft="4dp"
+    android:layout_marginRight="4dp"
+    android:elevation="4dp"
+    android:clipToOutline="true"
+    android:outlineProvider="background">
+
+    <TextView
+        android:id="@+id/tvNombreUsuario"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nombre"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:textColor="#222F3E"
+        android:layout_marginBottom="2dp" />
+
+    <TextView
+        android:id="@+id/tvCorreoUsuario"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Correo"
+        android:textSize="15sp"
+        android:textColor="#576574"
+        android:layout_marginTop="2dp" />
+
+    <TextView
+        android:id="@+id/tvRolUsuario"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rol"
+        android:textSize="15sp"
+        android:textColor="#10ac84"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <Button
+            android:id="@+id/btnVerUbicaciones"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Ver ubicaciones"
+            android:textAllCaps="false"
+            android:backgroundTint="#54a0ff"
+            android:textColor="#fff" />
+
+        <Button
+            android:id="@+id/btnEliminarUsuario"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Eliminar"
+            android:textAllCaps="false"
+            android:backgroundTint="#ee5253"
+            android:textColor="#fff" />
+    </LinearLayout>
+</LinearLayout>
