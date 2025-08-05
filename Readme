@@ -2,6 +2,7 @@
 1.	OBJETIVO
 
 Desarrollar una aplicación móvil que permita a topógrafos registrar, visualizar y compartir su ubicación en tiempo real, así como delimitar terrenos sobre un mapa interactivo, calcular áreas y almacenar la información en una base de datos segura.
+
 FUNCIONALIDADES IMPLEMENTADAS
 
 Login y Validación de Usuarios 
