@@ -8,11 +8,17 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.epdev.topotrackapp.databinding.FragmentPolygonBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.Polyline
@@ -43,8 +49,17 @@ class PolygonFragment : Fragment() {
 
     private fun setupMap() {
         Configuration.getInstance().userAgentValue = requireContext().packageName
-        binding.mapPolygon.setTileSource(TileSourceFactory.MAPNIK)
-        binding.mapPolygon.setMultiTouchControls(true)
+        binding.mapPolygon.apply {
+            setTileSource(TileSourceFactory.MAPNIK)
+            setMultiTouchControls(true)
+            minZoomLevel = 12.0
+            maxZoomLevel = 21.0
+            setScrollableAreaLimitLatitude(
+                MapView.getTileSystem().maxLatitude,
+                MapView.getTileSystem().minLatitude,
+                0
+            )
+        }
     }
 
     private fun setupUI() {
@@ -56,6 +71,7 @@ class PolygonFragment : Fragment() {
         binding.btnSelectPolygon.setOnClickListener {
             showPolygonSelectionDialog()
         }
+
         binding.btnDeletePolygon.setOnClickListener {
             val poligono = viewModel.selectedPoligono.value
             if (poligono == null) {
@@ -73,7 +89,6 @@ class PolygonFragment : Fragment() {
                 .setNegativeButton("Cancelar", null)
                 .show()
         }
-
     }
 
     private fun setupObservers() {
@@ -92,7 +107,11 @@ class PolygonFragment : Fragment() {
         }
 
         viewModel.selectedPoligono.observe(viewLifecycleOwner) { poligono ->
-            poligono?.let { displayPolygon(it) }
+            poligono?.let {
+                if (isAdded && !isDetached) {
+                    displayPolygon(it)
+                }
+            }
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
@@ -101,6 +120,7 @@ class PolygonFragment : Fragment() {
                 Toast.makeText(requireContext(), error, Toast.LENGTH_LONG).show()
             }
         }
+
         viewModel.poligonoEliminado.observe(viewLifecycleOwner) { eliminado ->
             if (eliminado) {
                 binding.mapPolygon.overlays.clear()
@@ -112,28 +132,32 @@ class PolygonFragment : Fragment() {
                 viewModel.fetchPoligonos()
             }
         }
-
     }
 
     private fun displayPolygon(poligono: PolygonViewModel.Poligono) {
         binding.mapPolygon.overlays.clear()
-        val geoPoints = poligono.coordenadas.map { GeoPoint(it.lat, it.lon) }
 
-        updatePolygonInfo(poligono)
-        drawMarkers(geoPoints)
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {
+            val geoPoints = poligono.coordenadas.map { GeoPoint(it.lat, it.lon) }
 
-        if (geoPoints.size >= 3) {
-            drawPolygon(geoPoints)
-            zoomToPolygon(geoPoints)
-        } else {
-            drawDecorativeShape(geoPoints)
-            Toast.makeText(
-                requireContext(),
-                "Polígono incompleto (solo ${geoPoints.size} puntos)",
-                Toast.LENGTH_SHORT
-            ).show()
+            withContext(Dispatchers.Main) {
+                updatePolygonInfo(poligono)
+                drawMarkers(geoPoints)
+
+                if (geoPoints.size >= 3) {
+                    drawPolygon(geoPoints)
+                    zoomToPolygon(geoPoints)
+                } else {
+                    drawDecorativeShape(geoPoints)
+                    Toast.makeText(
+                        requireContext(),
+                        "Polígono incompleto (solo ${geoPoints.size} puntos)",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                binding.mapPolygon.invalidate()
+            }
         }
-        binding.mapPolygon.invalidate()
     }
 
     private fun updatePolygonInfo(poligono: PolygonViewModel.Poligono) {
@@ -144,24 +168,42 @@ class PolygonFragment : Fragment() {
     }
 
     private fun drawMarkers(points: List<GeoPoint>) {
-        points.forEachIndexed { index, point ->
-            Marker(binding.mapPolygon).apply {
-                position = point
-                title = "Punto ${index + 1} (${"%.6f".format(point.latitude)}, ${"%.6f".format(point.longitude)})"
-                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                binding.mapPolygon.overlays.add(this)
+        if (points.size > 50) { // Limitar marcadores si son demasiados
+            points.filterIndexed { index, _ -> index % 5 == 0 }.forEach { point ->
+                addMarker(point)
             }
+            return
+        }
+
+        points.forEach { point ->
+            addMarker(point)
+        }
+    }
+
+    private fun addMarker(point: GeoPoint) {
+        Marker(binding.mapPolygon).apply {
+            position = point
+            title = "Punto (${"%.6f".format(point.latitude)}, ${"%.6f".format(point.longitude)})"
+            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            binding.mapPolygon.overlays.add(this)
         }
     }
 
     private fun drawPolygon(points: List<GeoPoint>) {
+        val simplifiedPoints = if (points.size > 100) simplifyPoints(points) else points
+
         Polygon().apply {
             fillPaint.color = Color.argb(70, 76, 175, 80)
             outlinePaint.color = Color.rgb(46, 125, 50)
             outlinePaint.strokeWidth = 5f
-            setPoints(points + points.first())
+            setPoints(simplifiedPoints + simplifiedPoints.first())
             binding.mapPolygon.overlays.add(this)
         }
+    }
+
+    private fun simplifyPoints(points: List<GeoPoint>): List<GeoPoint> {
+        return if (points.size > 100) points.filterIndexed { index, _ -> index % 2 == 0 }
+        else points
     }
 
     private fun drawDecorativeShape(points: List<GeoPoint>) {
@@ -177,8 +219,10 @@ class PolygonFragment : Fragment() {
     private fun zoomToPolygon(points: List<GeoPoint>) {
         if (points.size < 2) return
 
-        val boundingBox = org.osmdroid.util.BoundingBox.fromGeoPoints(points)
-        binding.mapPolygon.zoomToBoundingBox(boundingBox, true, 50)
+        val boundingBox = BoundingBox.fromGeoPoints(points)
+        binding.mapPolygon.post {
+            binding.mapPolygon.zoomToBoundingBox(boundingBox, true, 50)
+        }
     }
 
     private fun showPolygonSelectionDialog() {
@@ -211,8 +255,12 @@ class PolygonFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
-        binding.mapPolygon.onPause()
+        binding.mapPolygon.apply {
+            overlays.clear()
+            overlayManager.clear()
+            onPause()
+        }
         _binding = null
+        super.onDestroyView()
     }
 }
