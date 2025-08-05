@@ -1,8 +1,11 @@
 
 1.	OBJETIVO
+
 Desarrollar una aplicación móvil que permita a topógrafos registrar, visualizar y compartir su ubicación en tiempo real, así como delimitar terrenos sobre un mapa interactivo, calcular áreas y almacenar la información en una base de datos segura.
 FUNCIONALIDADES IMPLEMENTADAS
+
 Login y Validación de Usuarios 
+
 o	El sistema incluye un inicio de sesión funcional para validar usuarios registrados.
  
 o	Incluye un Registro con los apartados necesarios.
@@ -11,6 +14,7 @@ o	Incluye un Registro con los apartados necesarios.
 o	Las credenciales se verifican desde la base de datos Supabase.
  
 Sistema de Administración Móvil 
+
 Se modifico el login para aumentar la validación de las credenciales del administrador. Una vez se confirme ingresa a la pantalla del administrador. Correo: admin@topotrack.com  Password: admin123
  
 La pantalla del admin, cuenta con la visualización de los usuarios ingresados en el sistema y como administrador tendria tareas para visualizar la información de los usuarios, la capacidad ver su ubicación y eliminar dicho usuario.
@@ -23,6 +27,7 @@ o	Al momento de querer eliminar un usuario, nos sale un mensaje de confirmación
 o	Al momento de confirmar la eliminación te salta un mensaje de confirmación para indicar que el usuario fue eliminado de la base de datos
  
 Visualización de Terrenos y Características
+
 o	Los terrenos se pueden visualizar mediante un polígono sobre el mapa además de la opción de poder nombrar al terreno mismo que se guardara en Supabase.
              
 o	Se muestra el nombre del terreno, área calculada, coordenadas, y fecha de creación; además de tener las opciones de actualizar el polígono, eliminar los terrenos guardados y eliminarlos según requiera.
@@ -39,6 +44,7 @@ También las tablas en SUPABASE
 o	Está habilitada la opción de consultar detalles en una pantalla de resumen.
  
 Geolocalización en Tiempo Real 
+
 o	La ubicación de cada topógrafo se actualiza cada 10 segundos.
 
 	 
@@ -49,6 +55,7 @@ o	La aplicación puede ejecutarse en segundo plano, manteniendo la actualizació
       
 
 Cálculo de Área del Polígono
+
 o	Al definir un polígono con tres o más puntos, se calcula automáticamente su área, el resultado se almacena junto con la información del terreno.
 
 
