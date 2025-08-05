@@ -17,7 +17,9 @@ o	Las credenciales se verifican desde la base de datos Supabase.
 Sistema de Administración Móvil 
 
 Se modifico el login para aumentar la validación de las credenciales del administrador. Una vez se confirme ingresa a la pantalla del administrador. Correo: admin@topotrack.com  Password: admin123
- 
+
+![Pantalla de administración](IMÁGENES_README/admin.jpeg)
+
 La pantalla del admin, cuenta con la visualización de los usuarios ingresados en el sistema y como administrador tendria tareas para visualizar la información de los usuarios, la capacidad ver su ubicación y eliminar dicho usuario.
  
 
