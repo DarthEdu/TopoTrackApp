@@ -27,10 +27,6 @@ Desarrollar una aplicación móvil para topógrafos que permita:
 - 📝 Registro con los campos necesarios para nuevos usuarios.
 - 🔍 Verificación de credenciales desde la base de datos Supabase.
 
-![Pantalla de administración](https://github.com/DarthEdu/TopoTrackApp/blob/d3f9947b2ac832d136c8a0ca2c14d5d3634ad5fc/IMAGENES_README/admin.jpg)
-
----
-
 ### 2️⃣ Sistema de Administración Móvil
 
 - 🔐 Login mejorado para validación específica de credenciales de administrador.
@@ -91,7 +87,8 @@ Desarrollar una aplicación móvil para topógrafos que permita:
 
 - 🗄️ **Base de datos:** Supabase
 
----
+- 🗄️ **DOCUMENTACION**
+[LINK DOCUMENTACION](https://epnecuador-my.sharepoint.com/:b:/g/personal/mateo_tacuri_epn_edu_ec/EYi567NJtx5Bvme7HfLHgDUB81aTYhjpcH1hlHsydbbf6w?e=2keOHX)
 
 ## 📝 Conclusiones
 
