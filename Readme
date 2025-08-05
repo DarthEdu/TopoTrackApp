@@ -1,67 +1,81 @@
 
-1.	OBJETIVO
+# 🛰️ TopoTrack App
 
-Desarrollar una aplicación móvil que permita a topógrafos registrar, visualizar y compartir su ubicación en tiempo real, así como delimitar terrenos sobre un mapa interactivo, calcular áreas y almacenar la información en una base de datos segura.
+## 🎯 Objetivo
 
-FUNCIONALIDADES IMPLEMENTADAS
+Desarrollar una aplicación móvil para topógrafos que permita:
 
-Login y Validación de Usuarios 
+- 📍 Registrar, visualizar y compartir la ubicación en tiempo real.
+- 🗺️ Delimitar terrenos sobre un mapa interactivo.
+- 📐 Calcular áreas de terrenos.
+- 🔒 Almacenar toda la información en una base de datos segura.
 
-o	El sistema incluye un inicio de sesión funcional para validar usuarios registrados.
+---
+
+## 🚀 Funcionalidades Implementadas
+
+### 1️⃣ Login y Validación de Usuarios
+
+- 🔑 Inicio de sesión funcional para validar usuarios registrados.
+- 📝 Registro con los campos necesarios para nuevos usuarios.
+- 🔍 Verificación de credenciales desde la base de datos Supabase.
+
 ![Pantalla de administración](https://github.com/DarthEdu/TopoTrackApp/blob/d3f9947b2ac832d136c8a0ca2c14d5d3634ad5fc/IMAGENES_README/admin.jpg)
-o	Incluye un Registro con los apartados necesarios.
- 
 
-o	Las credenciales se verifican desde la base de datos Supabase.
- 
-Sistema de Administración Móvil 
+---
 
-Se modifico el login para aumentar la validación de las credenciales del administrador. Una vez se confirme ingresa a la pantalla del administrador. Correo: admin@topotrack.com  Password: admin123
+### 2️⃣ Sistema de Administración Móvil
+
+- 🔐 Login mejorado para validación específica de credenciales de administrador.
+- 👤 Credenciales para acceso administrador:  
+  **Correo:** admin@topotrack.com  
+  **Password:** admin123
+- 📊 Pantalla de administración con:  
+  - 👥 Visualización de usuarios registrados.  
+  - 📍 Visualización de ubicación en tiempo real o última ubicación conocida.  
+  - ❌ Eliminación de usuarios con mensajes de confirmación para evitar errores.
 
 ![Pantalla de administración](IMÁGENES_README/admin.jpeg)
 
-La pantalla del admin, cuenta con la visualización de los usuarios ingresados en el sistema y como administrador tendria tareas para visualizar la información de los usuarios, la capacidad ver su ubicación y eliminar dicho usuario.
- 
+---
 
-o	Al ingresar a la parte de ver Ubicación, nos saldra a una pantalla de mapa con la ubicación en tiempo real o ultima ubicación de la persona para su visualización
- 
-o	Al momento de querer eliminar un usuario, nos sale un mensaje de confirmación.
- 
-o	Al momento de confirmar la eliminación te salta un mensaje de confirmación para indicar que el usuario fue eliminado de la base de datos
- 
-Visualización de Terrenos y Características
+### 3️⃣ Visualización de Terrenos y Características
 
-o	Los terrenos se pueden visualizar mediante un polígono sobre el mapa además de la opción de poder nombrar al terreno mismo que se guardara en Supabase.
-             
-o	Se muestra el nombre del terreno, área calculada, coordenadas, y fecha de creación; además de tener las opciones de actualizar el polígono, eliminar los terrenos guardados y eliminarlos según requiera.
-           
+- 🖊️ Delimitación de terrenos mediante polígonos sobre el mapa.
+- 🏷️ Posibilidad de nombrar terrenos, con guardado en Supabase.
+- 📋 Detalles visibles para cada terreno:  
+  - Nombre  
+  - Área calculada  
+  - Coordenadas  
+  - Fecha de creación
+- ✏️ Funcionalidades para actualizar o eliminar terrenos.
+- 🔍 Consulta de detalles en pantalla resumen.
 
-También las tablas en SUPABASE
+---
 
- 
+### 4️⃣ Geolocalización en Tiempo Real
 
+- ⏱️ Actualización automática de ubicación cada 10 segundos.
+- 🗺️ Uso de OSMDroid para visualización de mapas y marcadores.
+- 🔄 Ejecución en segundo plano, manteniendo la actualización activa incluso si la app está minimizada.
 
+---
 
+### 5️⃣ Cálculo de Área del Polígono
 
+- 📐 Cálculo automático del área al definir un polígono con tres o más puntos.
+- 💾 Área almacenada junto con la información del terreno.
 
-o	Está habilitada la opción de consultar detalles en una pantalla de resumen.
- 
-Geolocalización en Tiempo Real 
+---
 
-o	La ubicación de cada topógrafo se actualiza cada 10 segundos.
+## 📂 Recursos
 
-	 
-   
-o	Se utiliza OSMDroid para visualización del mapa y marcadores.
- 
-o	La aplicación puede ejecutarse en segundo plano, manteniendo la actualización activa, aunque la app esté minimizada.
-      
+- 🎥 **Video demostrativo:**  
+  [https://youtu.be/rmbbLSuJNWk?si=pK0t5ZJG843fTv17](https://youtu.be/rmbbLSuJNWk?si=pK0t5ZJG843fTv17)
 
-Cálculo de Área del Polígono
+- 📱 **APK de la aplicación:**  
+  [Descargar APK](https://epnecuador-my.sharepoint.com/:u:/g/personal/mateo_tacuri_epn_edu_ec/EYUOOkuRH3BMthgKdhr6OiwBQcHpOlypflQs1uHCUFVL3A?e=AHEWYs)
 
-o	Al definir un polígono con tres o más puntos, se calcula automáticamente su área, el resultado se almacena junto con la información del terreno.
+- 🗄️ **Base de datos:** Supabase
 
-
-LINK DEL VIDEO: https://youtu.be/rmbbLSuJNWk?si=pK0t5ZJG843fTv17
-LINK APK: https://epnecuador-my.sharepoint.com/:u:/g/personal/mateo_tacuri_epn_edu_ec/EYUOOkuRH3BMthgKdhr6OiwBQcHpOlypflQs1uHCUFVL3A?e=AHEWYs
-Para la base de datos se uso la plataforma Supabase
+---
