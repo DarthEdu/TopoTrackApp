@@ -23,7 +23,7 @@ class HomeViewModel : ViewModel() {
     val tituloIn: LiveData<String> = _tituloIn
 
     private val _integrantes = MutableLiveData<String>().apply {
-        value = "Martin Ayala \n" +"Mateo Bernal \n" + "Dennis Díaz \n" + "Eduardo Porras"
+        value = "Martin Ayala \n" +"Mateo Bernal \n" + "Dennis Díaz \n" + "Eduardo Porras \n" + "Mateo Tacuri"
     }
     val integrantes: LiveData<String> = _integrantes
 
