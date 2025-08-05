@@ -1,6 +1,13 @@
 
 # 🛰️ TopoTrack App
 
+INTEGRANTES:
+MATEO BERNAL
+MARTIN AYALA
+EDUARDO PORRAS
+DENNIS DIAZ
+MATEO TACURI
+
 ## 🎯 Objetivo
 
 Desarrollar una aplicación móvil para topógrafos que permita:
@@ -68,6 +75,12 @@ Desarrollar una aplicación móvil para topógrafos que permita:
 
 ---
 
+### 📲 Publicación en Tienda de Aplicaciones
+
+- 🛒 La aplicación ha sido publicada en una tienda digital, en este caso en **Uptodown**.
+
+---
+
 ## 📂 Recursos
 
 - 🎥 **Video demostrativo:**  
@@ -79,3 +92,13 @@ Desarrollar una aplicación móvil para topógrafos que permita:
 - 🗄️ **Base de datos:** Supabase
 
 ---
+
+## 📝 Conclusiones
+
+1. **La aplicación TopoTrack cumple eficazmente con el objetivo principal** de facilitar el registro, visualización y gestión de ubicaciones en tiempo real para topógrafos, aportando una herramienta útil para la delimitación y cálculo de áreas de terrenos mediante mapas interactivos.
+
+2. **La integración con Supabase como base de datos asegura la seguridad y confiabilidad** en el almacenamiento y validación de usuarios, así como en la gestión de datos geoespaciales, lo que permite una administración eficiente y accesible desde dispositivos móviles.
+
+3. **Las funcionalidades implementadas, incluyendo la geolocalización en segundo plano, el sistema de administración y el cálculo automático de áreas,** proporcionan una solución completa que mejora la productividad y precisión en trabajos topográficos, facilitando la colaboración y el control de usuarios en tiempo real.
+
+
